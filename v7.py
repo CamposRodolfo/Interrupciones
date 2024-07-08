@@ -1,17 +1,7 @@
-#Importación
-
 import os
-
-# Instalar PrettyTable
-# python -m pip install -U prettytable
 from prettytable import PrettyTable
 
-
-
-
-#Declaración de las Tablas
-
-#Tabla de IRQ (Tabla de Prioridades)
+# Declaración de las Tablas
 TablaPrioridad = PrettyTable()
 TablaPrioridad.field_names = ["#", "IRQ", "Prioridad", "Dispositivo"]
 TablaPrioridad.add_rows(
@@ -41,74 +31,47 @@ TablaPrioridad.add_rows(
     ]
 )
 
-
-#Tabla de Programa Principal
 TablaPrograma = PrettyTable()
 TablaPrograma.field_names = ["Tiempo Inicial", "Tiempo Final"]
-TablaPrograma.add_row([0,0])
+TablaPrograma.add_row([0, 0])
 
-
-#Tabla de Datos
 TablaDatos = PrettyTable()
 TablaDatos.field_names = ["Interrupción", "Dispositivo", "Duración"]
 
-
-#Tabla de Diagrama de Cola de Procesos
 TablaColaProcesos = PrettyTable()
 
-
-#Tabla de Diagrama de Control de Procesos
 TablaControlProcesos = PrettyTable()
 
-
-#Tabla de Auditoría
 TablaAuditoria = PrettyTable()
-TablaAuditoria.field_names = ["Tiempo Real", "Área de Dispositivo" , "¿Fue Interrumpido?", "Rango inicial", "Rango final" "Tiempo faltante"]
+TablaAuditoria.field_names = ["Tiempo Real", "Área de Dispositivo", "¿Fue Interrumpido?", "Rango inicial", "Rango final", "Tiempo faltante"]
 
-
-#Tabla de Bitácora
 TablaBitacoraInterrupciones = PrettyTable()
 TablaBitacoraInterrupciones.field_names = ["Tiempo Real", "Área de Dispositivo", "¿Fue Interrumpido?", "Rango de Tiempo en Dispositivo", "Tiempo Faltante"]
 
+# Declaración de Funciones
 
-
-
-
-#Declaración de Funciones
-
-#Ingresar Número Entero
 def EntradaNumero(mensaje):
-    NumeroInvalido = True
-    while NumeroInvalido:
+    while True:
         try:
-            numero = int(input(mensaje))
-            return numero
+            return int(input(mensaje))
         except ValueError:
-            print("\nEntrada Incorrecta. Por favor introduzca un número válido.")
-            print("Vuelve a intentarlo.\n")
-            
+            print("\nEntrada Incorrecta. Por favor introduzca un número válido.\n")
 
-# Función para ingresar el tiempo
 def EntradaTiempo(mensaje):
-    NumeroInvalido = True
-    while NumeroInvalido:
+    while True:
         tiempo = EntradaNumero(mensaje)
         if tiempo >= 0:
             print("\nEl número del tiempo seleccionado fue: ", tiempo)
-            NumeroInvalido = False
             return tiempo
         else:
-            print("\nEntrada Incorrecta. Por favor introduzca un número válido.")
-            print("Vuelva a intentarlo.\n")
+            print("\nEntrada Incorrecta. Por favor introduzca un número válido.\n")
 
-
-# Función para seleccionar el dispositivo
 def EntradaDispositivo(mensaje):
     limpiar_pantalla()
     while True:
         print(TablaPrioridad)
         NumeroDispositivo = EntradaNumero(mensaje)
-        if NumeroDispositivo > 0 and NumeroDispositivo <= 22:
+        if 0 < NumeroDispositivo <= 22:
             print("\nEl número del dispositivo seleccionado fue: ", NumeroDispositivo)
             data = TablaPrioridad._rows
             Dispositivo = None
@@ -118,139 +81,99 @@ def EntradaDispositivo(mensaje):
             print("\nEl dispositivo seleccionado fue: ", Dispositivo)
             return Dispositivo
         else:
-            print("\nEntrada Incorrecta. Por favor introduzca un número válido.")
-            print("Vuelva a intentarlo.\n")
+            print("\nEntrada Incorrecta. Por favor introduzca un número válido.\n")
 
-
-# Función para obtener la prioridad de un dispositivo
 def obtener_prioridad(dispositivo):
     for fila in TablaPrioridad._rows:
         if fila[3] == dispositivo:
             return fila[2]
     return float('inf')  # Retorna un valor muy alto si el dispositivo no se encuentra en la tabla
 
-
-#Declarar Tabla de Datos
 def InicializarTablaDeDatos():
     TablaPrograma.rows[0][0] = EntradaTiempo("\nIntroduzca el tiempo inicial para el programa:\n>>> ")
     TablaPrograma.rows[0][1] = EntradaTiempo("\nIntroduzca el tiempo final para el programa:\n>>> ")
     
     ImprimirTablaPrograma()
     
-    MasInterrupciones = True
-    while MasInterrupciones:
+    while True:
         Dispositivo = EntradaDispositivo("\nIngrese el número del dispositivo de la Interrupción:\n>>> ")
         TiempoInterrupcion = EntradaTiempo("\nIngrese el tiempo donde se dió la Interrupción:\n>>> ")
         TiempoDuracion = EntradaTiempo("\nIngrese la duración de la Interrupción:\n>>> ")
         TablaDatos.add_row([TiempoInterrupcion, Dispositivo, TiempoDuracion])
-        while True:
-            seleccion = EntradaNumero('\n\nDesea agregar más interrupciones?\nIntroduzca "1" para introducir más interrupciones, "0" para no introducir más.\n>>> ')
-            if seleccion == 0:
-                MasInterrupciones = False
-                break
-            elif seleccion == 1:
-                MasInterrupciones = True
-                break
-            else:
-                print("\nSeleccione un número válido.\n")
         
-            
+        seleccion = EntradaNumero('\n\nDesea agregar más interrupciones?\nIntroduzca "1" para introducir más interrupciones, "0" para no introducir más.\n>>> ')
+        if seleccion == 0:
+            break
+
     ImprimirTablaPrograma()
 
-
-#Trabajar en la Tabla de Cola de Procesos
 def InicializarColaProcesos():
     print("Diagrama De Cola de Procesos")
-    dispositivos = [f"{fila[1]}" for fila in TablaDatos._rows]
+    dispositivos = [fila[1] for fila in TablaDatos._rows]
     tiempos_iniciales = [f"T={fila[2]}" for fila in TablaDatos._rows]
     TablaColaProcesos.add_column("Dispositivo", dispositivos)
     TablaColaProcesos.add_column("TP1", tiempos_iniciales)
-    
 
-#Trabajar en la Tabla de Cola de Procesos
 def AgregarColaProcesos(dispositivo, tiempo):
-    # Buscar la fila donde el primer valor coincide con valor_buscar
     for fila in TablaColaProcesos._rows:
         if fila[0] == dispositivo:
-            # Recorrer las columnas de la fila para encontrar una celda vacía
             for i in range(1, len(fila)):
-                if fila[i] is None or fila[i] == "" or fila[i] == "-":
+                if not fila[i]:
                     fila[i] = tiempo
                     break
             else:
-                # Si no se encuentra una celda vacía, agregar una nueva columna
                 nueva_columna = f"TP{len(TablaColaProcesos.field_names)}"
                 TablaColaProcesos.field_names.append(nueva_columna)
-                TablaColaProcesos._align[nueva_columna] = 'c'  # Establecer alineación horizontal para la nueva columna
-                TablaColaProcesos._valign[nueva_columna] = 't'  # Establecer alineación vertical para la nueva columna
+                TablaColaProcesos._align[nueva_columna] = 'c'
+                TablaColaProcesos._valign[nueva_columna] = 't'
                 for f in TablaColaProcesos._rows:
                     f.append("-")
                 fila[-1] = tiempo
                 break
-                
     print(TablaColaProcesos)
-    
 
+def obtener_siguiente_interrupcion(tiempo_real, interrupciones_pendientes):
+    interrupciones = [(fila[0], fila[1], fila[2]) for fila in interrupciones_pendientes if fila[0] >= tiempo_real]
+    if interrupciones:
+        return min(interrupciones, key=lambda x: (x[0], obtener_prioridad(x[1])))
+    return None
 
-# Función para inicializar el control de procesos considerando la prioridad
 def InicializarControlProcesos():
     print("Inicializar Control de Procesos")
     tiempo_real = 0
     dispositivos = list(set([fila[1] for fila in TablaDatos._rows]))
     TablaControlProcesos.field_names = ["Tiempo", "Detalle", "Programa"] + dispositivos
-    tiempos_iniciales = [f"" for _ in dispositivos]
-    TablaControlProcesos.add_row([tiempo_real, "En ejecución", "T=0"] + tiempos_iniciales)
+    tiempos_iniciales = [""] * len(dispositivos)
+    TablaControlProcesos.add_row([tiempo_real, "Inicio Programa", f"T={tiempo_real}"] + tiempos_iniciales)
     
-    # Ordenar las filas de TablaColaProcesos por prioridad
-    TablaColaProcesos._rows.sort(key=lambda fila: obtener_prioridad(fila[0]))
+    interrupciones_pendientes = [list(fila) for fila in TablaDatos._rows]
+    while interrupciones_pendientes:
+        siguiente_interrupcion = obtener_siguiente_interrupcion(tiempo_real, interrupciones_pendientes)
+        if siguiente_interrupcion:
+            tiempo_interrupcion, dispositivo, duracion = siguiente_interrupcion
+            if tiempo_interrupcion > tiempo_real:
+                tiempo_real = tiempo_interrupcion
 
-    while any(int(fila[-1].split('=')[1]) > tiempo_real for fila in TablaColaProcesos._rows):
-        for fila in TablaColaProcesos._rows:
-            tiempo_real += 1
-            if int(fila[-1].split('=')[1]) > tiempo_real:
-                max_tiempo = fila[-1]
-                # Aquí puedes agregar lógica adicional para manejar los programas con tiempo superior a 0
-                
-                # Agregar una nueva fila en el control de procesos para reflejar el cambio de estado
-                nueva_fila = [tiempo_real, f"Interrumpido por {fila[0]}"] + [""] * len(dispositivos)
-                indice_dispositivo = dispositivos.index(fila[0])
-                nueva_fila[indice_dispositivo + 3] = f"T={tiempo_real}"
-                TablaControlProcesos.add_row(nueva_fila)
-                
-                fin_interrupcion = tiempo_real + int(fila[-1].split('=')[1])
-                nueva_fila = [fin_interrupcion, "En ejecución", f"T={fin_interrupcion}"] + [""] * len(dispositivos)
-                nueva_fila[indice_dispositivo + 3] = f"T={fin_interrupcion}(Dur. {fila[-1]}s)"
-                TablaControlProcesos.add_row(nueva_fila)
+            nueva_fila = [tiempo_real, f"Interrumpido por {dispositivo}", ""] + [""] * len(dispositivos)
+            indice_dispositivo = dispositivos.index(dispositivo)
+            nueva_fila[indice_dispositivo + 3] = f"T={tiempo_real}"
+            TablaControlProcesos.add_row(nueva_fila)
+
+            fin_interrupcion = tiempo_real + duracion
+            nueva_fila = [fin_interrupcion, "En ejecución", f"T={fin_interrupcion}"] + [""] * len(dispositivos)
+            nueva_fila[indice_dispositivo + 3] = f"T={fin_interrupcion}(Dur. {duracion}s)"
+            TablaControlProcesos.add_row(nueva_fila)
+
+            interrupciones_pendientes.remove(list(siguiente_interrupcion))
+            tiempo_real = fin_interrupcion
+        else:
+            break
 
     print(TablaControlProcesos)
-    
 
-#Diagrama De Control de Procesos
-def AgregarControlProcesos():
-    print("Agregaar Control de Procesos")
-    
-
-
-#Trabajar en la Tabla de Bitácora
-def DiagramaBitacoraInterrupciones():
-    print("Diagrama de Bitacora de Interrupciones")
-
-
-
-
-#Funcion de Impresión de Tablas
-
-# Función para limpiar la pantalla
 def limpiar_pantalla():
-    # Verificar el sistema operativo
-    sistema_operativo = os.name
-    if sistema_operativo == 'nt':  # Windows
-        _ = os.system('cls')
-    else:  # Unix/Linux/MacOS
-        _ = os.system('clear')
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-
-#Impresión de tabla de de Datos
 def ImprimirTablaPrograma():
     print("+--------------+-------------+----------+")
     print("|              Tabla De Datos           |")
@@ -258,24 +181,12 @@ def ImprimirTablaPrograma():
     print("|   Programa:      Ti:", TablaPrograma.rows[0][0], "      Tf:", TablaPrograma.rows[0][1], "  |")
     print("+--------------+-------------+----------+\n")
     print(TablaDatos)
-    
 
-
-#Declaración de Main
 def main():
     limpiar_pantalla()
-    
     InicializarTablaDeDatos()
-    input("Presiona Enter para continuar...")
-    limpiar_pantalla()
-    
     InicializarColaProcesos()
-    
-    # AgregarColaProcesos()
-    
     InicializarControlProcesos()
-    
-    DiagramaBitacoraInterrupciones()
-    
+
 if __name__ == "__main__":
     main()

@@ -101,8 +101,11 @@ def EntradaDispositivo(mensaje):
 def InicializarTablaDeDatos():
     TablaPrograma.rows[0][0] = EntradaTiempo("\nIntroduzca el tiempo inicial para el programa:\n>>> ")
     TablaPrograma.rows[0][1] = EntradaTiempo("\nIntroduzca el tiempo final para el programa:\n>>> ")
-
+    TablaDatos.add_row([TablaPrograma.rows[0][0], "Programa", TablaPrograma.rows[0][1]])
+    
     ImprimirTablaPrograma()
+    input("Presiona Enter para continuar...")
+    limpiar_pantalla()
 
     MasInterrupciones = True
     while MasInterrupciones:
@@ -158,9 +161,9 @@ def InicializarControlProcesos():
     print("Inicializar Control de Procesos")
     # Obtener dispositivos únicos
     dispositivos = list(set([fila[1] for fila in TablaDatos._rows]))
-    TablaControlProcesos.field_names = ["Tiempo","Detalle", "Programa"] + dispositivos
+    TablaControlProcesos.field_names = ["Tiempo","Detalle"] + dispositivos
     tiempos_iniciales = [0 for _ in dispositivos]
-    TablaControlProcesos.add_row([0, "En ejecución", "T=0"] + tiempos_iniciales)
+    TablaControlProcesos.add_row([0, "En ejecución"] + tiempos_iniciales)
 
     for fila in TablaDatos._rows:
         tiempo, dispositivo, duracion = fila
