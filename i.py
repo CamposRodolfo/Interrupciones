@@ -167,7 +167,7 @@ def InicializarControlProcesos():
         nueva_fila = [tiempo, f"Interrumpido por {dispositivo}"]
         for d in dispositivos:
             if d == dispositivo:
-                nueva_fila.append(f"T={tiempo}(Dur. {duracion}s)")
+                nueva_fila.append(f"T={tiempo}")
             else:
                 nueva_fila.append("")
         TablaControlProcesos.add_row(nueva_fila)
@@ -175,7 +175,7 @@ def InicializarControlProcesos():
         nueva_fila = [fin_interrupcion, "En ejecución"]
         for d in dispositivos:
             if d == dispositivo:
-                nueva_fila.append(f"T={fin_interrupcion}")
+                nueva_fila.append(f"T={fin_interrupcion}(Dur. {duracion}s)")
             else:
                 nueva_fila.append("")
         TablaControlProcesos.add_row(nueva_fila)
