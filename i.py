@@ -124,11 +124,11 @@ def InicializarTablaDeDatos():
     ImprimirTablaPrograma()
 
 def ImprimirTablaPrograma():
-    print("\n+------------------+-----------------+----------+")
-    print("| Tiempo Inicial   | Tiempo Final    | Duración |")
-    print("+------------------+-----------------+----------+")
+    print("\n+------------------+----------------+")
+    print("| Tiempo Inicial   | Tiempo Final   |")
+    print("+------------------+----------------+")
     print("|", TablaPrograma.rows[0][0], "              |", TablaPrograma.rows[0][1], "               |")
-    print("+------------------+-----------------+----------+\n")
+    print("+------------------+----------------+\n")
     print(TablaDatos)
 
 # Trabajar en la Tabla de Cola de Procesos
@@ -137,7 +137,7 @@ def InicializarColaProcesos():
     dispositivos = [f"{fila[1]}" for fila in TablaDatos._rows]
     tiempos_faltantes = [f"{fila[2]}" for fila in TablaDatos._rows]
     TablaColaProcesos.add_column("Dispositivo", dispositivos)
-    TablaColaProcesos.add_column("Tiempo Faltante", tiempos_faltantes)
+    TablaColaProcesos.add_column("", tiempos_faltantes)
     print(TablaColaProcesos)
 
 # Trabajar en la Tabla de Cola de Procesos
@@ -167,7 +167,7 @@ def InicializarControlProcesos():
         nueva_fila = [tiempo, f"Interrumpido por {dispositivo}"]
         for d in dispositivos:
             if d == dispositivo:
-                nueva_fila.append(f"T={tiempo}(Se ejecutó {duracion}s)")
+                nueva_fila.append(f"T={tiempo}(Dur. {duracion}s)")
             else:
                 nueva_fila.append("")
         TablaControlProcesos.add_row(nueva_fila)
@@ -179,6 +179,12 @@ def InicializarControlProcesos():
             else:
                 nueva_fila.append("")
         TablaControlProcesos.add_row(nueva_fila)
+
+    # Ajustar ancho de columnas
+    for i, nombre in enumerate(TablaControlProcesos.field_names):
+        TablaControlProcesos.align[nombre] = "c"
+        if i > 1:  # Ajustar solo columnas de dispositivos
+            TablaControlProcesos.max_width[nombre] = 15
 
     print(TablaControlProcesos)
 
@@ -200,36 +206,35 @@ def DiagramaBitacoraInterrupciones():
             else:
                 print("\nSeleccione un número válido.\n")
 
+    # Obtener dispositivos únicos
+    dispositivos = list(set([fila[1] for fila in TablaDatos._rows]))
+
     for tiempo_real in tiempos_reales:
+        area_dispositivo = "En ejecución"
+        fue_interrumpido = "No"
+        rango_tiempo = "-"
+        tiempo_faltante = "-"
+
         for fila in TablaDatos._rows:
-            TablaBitacoraInterrupciones.add_row([tiempo_real, fila[1], "No", f"{fila[0]}-{fila[0] + fila[2]}", fila[2]])
-    
+            tiempo, dispositivo, duracion = fila
+            if tiempo <= tiempo_real < tiempo + duracion:
+                area_dispositivo = dispositivo
+                fue_interrumpido = "Sí"
+                rango_tiempo = f"{tiempo}-{tiempo + duracion}"
+                tiempo_faltante = max(0, (tiempo + duracion) - tiempo_real)
+                break
+
+        TablaBitacoraInterrupciones.add_row([tiempo_real, area_dispositivo, fue_interrumpido, rango_tiempo, tiempo_faltante])
+
     print(TablaBitacoraInterrupciones)
 
-# Función para limpiar la pantalla
 def limpiar_pantalla():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-# Declaración de Main
-def main():
-    limpiar_pantalla()
-    print(TablaPrioridad)
-    
-    InicializarTablaDeDatos()
-    input("Presione Enter para continuar...")
-    limpiar_pantalla()
-    
-    InicializarColaProcesos()
-    print(TablaColaProcesos)
-    input("Presione Enter para continuar...")
-    limpiar_pantalla()
-    
-    InicializarControlProcesos()
-    print(TablaControlProcesos)
-    input("Presione Enter para continuar...")
-    limpiar_pantalla()
-    
-    DiagramaBitacoraInterrupciones()
-
+# Main
 if __name__ == "__main__":
-    main()
+    limpiar_pantalla()
+    InicializarTablaDeDatos()
+    InicializarColaProcesos()
+    InicializarControlProcesos()
+    DiagramaBitacoraInterrupciones()
