@@ -158,9 +158,9 @@ def InicializarControlProcesos():
     print("Inicializar Control de Procesos")
     # Obtener dispositivos únicos
     dispositivos = list(set([fila[1] for fila in TablaDatos._rows]))
-    TablaControlProcesos.field_names = ["Tiempo", "Programa"] + dispositivos
+    TablaControlProcesos.field_names = ["Tiempo","Detalle", "Programa"] + dispositivos
     tiempos_iniciales = [0 for _ in dispositivos]
-    TablaControlProcesos.add_row([0, "En ejecución"] + tiempos_iniciales)
+    TablaControlProcesos.add_row([0, "En ejecución", "T=0"] + tiempos_iniciales)
 
     for fila in TablaDatos._rows:
         tiempo, dispositivo, duracion = fila
