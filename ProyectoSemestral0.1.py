@@ -185,8 +185,22 @@ print("+------------------------------+")
 print(TablaBitacoraInterrupciones)
 
 
-def ColaDeProceso():
 
+
+
+
+
+
+
+
+
+
+def ColaDeProceso(T0, tf):
+    
+    while
+    
+    
+    
 while ColaDeProcesoPrograma > 0
     TablaColaProcesos= programa, EntradaTiempo
     tiempoTotal = 0
@@ -206,6 +220,19 @@ while ColaDeProcesoPrograma > 0
     
     tiempototal = tiempototal + 1
     
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def BitacoraProcesos ():
