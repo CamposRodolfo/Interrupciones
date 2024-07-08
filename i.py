@@ -48,10 +48,6 @@ TablaColaProcesos = PrettyTable()
 # Tabla de Diagrama de Control de Procesos
 TablaControlProcesos = PrettyTable()
 
-# Tabla de Auditoría
-TablaAuditoria = PrettyTable()
-TablaAuditoria.field_names = ["Tiempo Real", "Área de Dispositivo", "¿Fue Interrumpido?", "Rango inicial", "Rango final", "Tiempo faltante"]
-
 # Tabla de Bitácora
 TablaBitacoraInterrupciones = PrettyTable()
 TablaBitacoraInterrupciones.field_names = ["Tiempo Real", "Área de Dispositivo", "¿Fue Interrumpido?", "Rango de Tiempo en Dispositivo", "Tiempo Faltante"]
@@ -127,6 +123,14 @@ def InicializarTablaDeDatos():
 
     ImprimirTablaPrograma()
 
+def ImprimirTablaPrograma():
+    print("\n+------------------+-----------------+----------+")
+    print("| Tiempo Inicial   | Tiempo Final    | Duración |")
+    print("+------------------+-----------------+----------+")
+    print("|", TablaPrograma.rows[0][0], "              |", TablaPrograma.rows[0][1], "               |")
+    print("+------------------+-----------------+----------+\n")
+    print(TablaDatos)
+
 # Trabajar en la Tabla de Cola de Procesos
 def InicializarColaProcesos():
     print("Diagrama De Cola de Procesos")
@@ -152,54 +156,79 @@ def AgregarColaProcesos(dispositivo, tiempo_faltante):
 # Diagrama De Control de Procesos
 def InicializarControlProcesos():
     print("Inicializar Control de Procesos")
-    dispositivos = [f"{fila[1]}" for fila in TablaDatos._rows]
-    TablaControlProcesos.field_names = ["Programa"] + dispositivos
-    TablaControlProcesos.add_row([0] + [f"-" for fila in TablaDatos._rows])
-    print(TablaControlProcesos)
+    # Obtener dispositivos únicos
+    dispositivos = list(set([fila[1] for fila in TablaDatos._rows]))
+    TablaControlProcesos.field_names = ["Tiempo", "Programa"] + dispositivos
+    tiempos_iniciales = [0 for _ in dispositivos]
+    TablaControlProcesos.add_row([0, "En ejecución"] + tiempos_iniciales)
 
-# Diagrama De Control de Procesos
-def AgregarControlProcesos():
-    print("Agregar Control de Procesos")
+    for fila in TablaDatos._rows:
+        tiempo, dispositivo, duracion = fila
+        nueva_fila = [tiempo, f"Interrumpido por {dispositivo}"]
+        for d in dispositivos:
+            if d == dispositivo:
+                nueva_fila.append(f"T={tiempo}(Se ejecutó {duracion}s)")
+            else:
+                nueva_fila.append("")
+        TablaControlProcesos.add_row(nueva_fila)
+        fin_interrupcion = tiempo + duracion
+        nueva_fila = [fin_interrupcion, "En ejecución"]
+        for d in dispositivos:
+            if d == dispositivo:
+                nueva_fila.append(f"T={fin_interrupcion}")
+            else:
+                nueva_fila.append("")
+        TablaControlProcesos.add_row(nueva_fila)
+
+    print(TablaControlProcesos)
 
 # Trabajar en la Tabla de Bitácora
 def DiagramaBitacoraInterrupciones():
-    print("Diagrama de Bitacora de Interrupciones")
-    for fila in TablaDatos._rows:
-        TablaBitacoraInterrupciones.add_row([fila[0], fila[1], "No", f"{fila[0]}-{fila[0] + fila[2]}", fila[2]])
+    tiempos_reales = []
+    MasTiemposReales = True
+    while MasTiemposReales:
+        tiempo_real = EntradaTiempo("Introduzca el tiempo real para la bitácora:\n>>> ")
+        tiempos_reales.append(tiempo_real)
+        while True:
+            seleccion = EntradaNumero('\n\nDesea agregar más tiempos reales?\nIntroduzca "1" para agregar más tiempos reales, "0" para no agregar más.\n>>> ')
+            if seleccion == 0:
+                MasTiemposReales = False
+                break
+            elif seleccion == 1:
+                MasTiemposReales = True
+                break
+            else:
+                print("\nSeleccione un número válido.\n")
+
+    for tiempo_real in tiempos_reales:
+        for fila in TablaDatos._rows:
+            TablaBitacoraInterrupciones.add_row([tiempo_real, fila[1], "No", f"{fila[0]}-{fila[0] + fila[2]}", fila[2]])
+    
     print(TablaBitacoraInterrupciones)
 
 # Función para limpiar la pantalla
 def limpiar_pantalla():
-    sistema_operativo = os.name
-    if sistema_operativo == 'nt':  # Windows
-        _ = os.system('cls')
-    else:  # Unix/Linux/MacOS
-        _ = os.system('clear')
-
-# Impresión de tabla de de Datos
-def ImprimirTablaPrograma():
-    print("+--------------+-------------+----------+")
-    print("|              Tabla De Datos           |")
-    print("+---------------------------------------+")
-    print("|   Programa:      Ti:", TablaPrograma.rows[0][0], "      Tf:", TablaPrograma.rows[0][1], "  |")
-    print("+--------------+-------------+----------+\n")
-    print(TablaDatos)
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 # Declaración de Main
 def main():
     limpiar_pantalla()
-    InicializarTablaDeDatos()
-
-    input("Presiona Enter para continuar...")
-    limpiar_pantalla()
-    InicializarColaProcesos()
-
-
+    print(TablaPrioridad)
     
-    input("Presiona Enter para continuar...")
+    InicializarTablaDeDatos()
+    input("Presione Enter para continuar...")
     limpiar_pantalla()
+    
+    InicializarColaProcesos()
+    print(TablaColaProcesos)
+    input("Presione Enter para continuar...")
+    limpiar_pantalla()
+    
     InicializarControlProcesos()
+    print(TablaControlProcesos)
+    input("Presione Enter para continuar...")
     limpiar_pantalla()
+    
     DiagramaBitacoraInterrupciones()
 
 if __name__ == "__main__":
